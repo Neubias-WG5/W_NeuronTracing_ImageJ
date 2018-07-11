@@ -3,11 +3,12 @@ import sys
 from subprocess import call
 
 from cytomine import CytomineJob
-from cytomine.models import Annotation, Job, ImageInstanceCollection, AnnotationCollection
+from cytomine.models import Annotation, Job, ImageGroupCollection, AnnotationCollection
 from shapely.affinity import affine_transform
 from skimage import io
 
-from mask_to_objects import mask_to_objects_2d
+#from mask_to_objects import mask_to_objects_2d
+from neubiaswg5.metrics.compute_metrics import computemetrics
 
 
 def main(argv):
@@ -43,8 +44,8 @@ def main(argv):
             input_image.download(os.path.join(in_path, "{id}.tif"))
 
         for gt_image in gt_images:
-            related_name = gt_image.originalFilename.replace(gt_suffix, '')
-            related_image = [i for i in input_images if related_name == i.originalFilename]
+            related_name = gt_image.name.replace(gt_suffix, '')
+            related_image = [i for i in input_images if related_name == i.name]
             if len(related_image) == 1:
                 gt_image.download(os.path.join(gt_path, "{}.tif".format(related_image[0].id)))
 
@@ -84,14 +85,23 @@ def main(argv):
 
         # 5. Compute the metrics
         cj.job.update(progress=80, statusComment="Computing metrics...")
+        for image in cj.monitor(input_images, start=80, end=98, period=0.1, prefix="computing metrics"):
+                afile = "{}.tif".format(image.id)
+                pathi = os.path.join(in_path, afile)
+                patho = os.path.join(out_path, afile)
+#            data = io.imread(path)
+
+                metrics,params=computemetrics(pathi,patho,"TreTrc",'/tmp')
+                print('metrics for '+pathi)
+                print(metrics)
 
         # TODO: compute metrics:
         # in /out: output files {id}.tiff
         # in /ground_truth: label files {id}.tiff
 
         cj.job.update(progress=99, statusComment="Cleaning...")
-        for image in input_images:
-            os.remove(os.path.join(in_path, "{}.tif".format(image.id)))
+#        for image in input_images:
+#            os.remove(os.path.join(in_path, "{}.tif".format(image.id)))
 
         cj.job.update(status=Job.TERMINATED, progress=100, statusComment="Finished.")
 
