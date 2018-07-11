@@ -12,10 +12,6 @@
 
 setBatchMode(true);
 
-// Path to input image and output image (label mask)
-inputDir = "/dockershare/666/in/";
-outputDir = "/dockershare/666/out/";
-
 // Functional parameters
 // Workflow parameters
 TubeRad = 4;
@@ -25,13 +21,11 @@ CloseRad = 1;
 arg = getArgument();
 parts = split(arg, ",");
 
-//for(i=0; i<parts.length; i++) {
-//	nameAndValue = split(parts[i], "=");
-//	if (indexOf(nameAndValue[0], "input")>-1) inputDir=nameAndValue[1];
-//	if (indexOf(nameAndValue[0], "output")>-1) outputDir=nameAndValue[1];
-//	if (indexOf(nameAndValue[0], "radius")>-1) LapRad=nameAndValue[1];
-//	if (indexOf(nameAndValue[0], "threshold")>-1) LapThr=nameAndValue[1];
-//}
+for(i=0; i<parts.length; i++) {
+	nameAndValue = split(parts[i], "=");
+	if (indexOf(nameAndValue[0], "input")>-1) inputDir=nameAndValue[1];
+	if (indexOf(nameAndValue[0], "output")>-1) outputDir=nameAndValue[1];
+}
 
 images = getFileList(inputDir);
 
